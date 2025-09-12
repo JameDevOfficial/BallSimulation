@@ -1,6 +1,6 @@
 local M = {}
 
-M.createBall = function(screen,world, originalBall)
+M.createBall = function(screen, world, originalBall)
     local ball = originalBall
     ball.position = {}
     ball.position.X = screen.centerX
@@ -36,9 +36,7 @@ M.accelerateBall = function(ball, dt)
         local vx, vy = ball.body:getLinearVelocity()
         ball.body:setLinearVelocity(vx * accelerateFactor, vy * accelerateFactor)
         timer = timer - accelerateInterval
-        print("speed up to ", vx, vy)
     end
-
 end
 
 return M
