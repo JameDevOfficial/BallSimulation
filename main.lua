@@ -8,13 +8,15 @@ Debug = require("game.libs.debug")
 PerformanceMonitor = require("game.libs.performance")
 
 IsPaused = false
+HoveringUIElement = false
+SplitBalls = false -- TODO
+
 Screen = {}
 World = {
     world = love.physics.newWorld(0, 100, true)
 }
 Balls = {}
-SplitBalls = false
-
+Rects = {}
 local ball = {
     position = { X = Screen.centerX, Y = Screen.centerY },
     color = { 0.2, 1, 0.2, 1 },
@@ -23,7 +25,6 @@ local ball = {
     splitCooldown = 0,
     canSplit = true,
 }
-local rects = {}
 local rect = {
     position = { X = Screen.centerX, Y = Screen.centerY },
     color = { 0.2, 1, 0.2, 1 },
@@ -35,7 +36,8 @@ local border = {}
 
 function love.load(dt)
     Screen = UserInterface.windowResized()
-    World.world:setCallbacks(PhysicsCore.beginContact, PhysicsCore.endContact, PhysicsCore.preContact, PhysicsCore.postSolve)
+    World.world:setCallbacks(PhysicsCore.beginContact, PhysicsCore.endContact, PhysicsCore.preContact,
+        PhysicsCore.postSolve)
     print(Screen.topLeft.X, Screen.topLeft.Y, Screen.topRight.X, Screen.topRight.Y, Screen.bottomRight.X,
         Screen.bottomRight.Y, Screen.bottomLeft.X, Screen.bottomLeft.Y)
     ball = PhysicsCore.createBall(Screen, World, ball)
@@ -50,14 +52,13 @@ function love.update(dt)
     PhysicsCore.handleSplittingCooldown(Balls, dt)
     PhysicsCore.accelerateAllBalls(Balls, dt)
     World.world.update(World.world, dt)
-    
+    HoveringUIElement = false
+    UserInterface.drawSuit()
 end
 
 function love.draw()
-    love.graphics.setColor(1, 0, 0)
-    UserInterface.drawFrame(Screen, Balls, rects)
+    UserInterface.drawFrame(Screen, Balls, Rects)
     Suit.draw()
-
     --DebugWorldDraw(World.world, ((Screen.X - Screen.minSize) / 2), ((Screen.Y - Screen.minSize) / 2), Screen.minSize,Screen.minSize)
 end
 
@@ -68,10 +69,11 @@ function love.resize()
 end
 
 function love.mousepressed(x, y, button)
+    if HoveringUIElement then return end
     if button == 1 then
         local x, y = love.mouse.getPosition()
         local newBall = {
-            position = {X=x, Y=y},
+            position = { X = x, Y = y },
             color = { math.random(), math.random(), math.random(), 1 },
             radius = math.random(10, 50),
             startVelocity = 100,
@@ -95,14 +97,14 @@ function love.mousepressed(x, y, button)
         }
         newRect = PhysicsCore.createRect(Screen, World, newRect)
         newRect.body:setLinearVelocity(rect.startVelocity, rect.startVelocity * math.pi)
-        table.insert(rects, newRect)
-        print("made new rect (" .. #rects .. ")")
+        table.insert(Rects, newRect)
+        print("made new rect (" .. #Rects .. ")")
     end
 end
 
 --Keypressed
 function love.keypressed(k)
-    Debug.keypressed(k, Balls, rects)
+    Debug.keypressed(k, Balls, Rects)
     Suit.keypressed(k)
 end
 

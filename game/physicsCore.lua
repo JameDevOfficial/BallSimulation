@@ -82,6 +82,7 @@ M.splitBall = function(balls, splitIntoAmount, collisionPoint)
             newBall.position = { X = px, Y = py }
 
             newBall = M.createBall(Screen, World, newBall)
+            M.accelerateBall(newBall, nil)
             table.insert(toAdd, newBall)
         end
         -- Mark for removal
@@ -123,11 +124,16 @@ local accelerateInterval = 1 --seconds
 local accelerateFactor = 1.1
 
 M.accelerateBall = function(ball, dt)
-    timer = timer + dt
-    if timer >= accelerateInterval then
+    if dt then
+        timer = timer + dt
+        if timer >= accelerateInterval then
+            local vx, vy = ball.body:getLinearVelocity()
+            ball.body:setLinearVelocity(vx * accelerateFactor, vy * accelerateFactor)
+            timer = timer - accelerateInterval
+        end
+    else
         local vx, vy = ball.body:getLinearVelocity()
         ball.body:setLinearVelocity(vx * accelerateFactor, vy * accelerateFactor)
-        timer = timer - accelerateInterval
     end
 end
 
