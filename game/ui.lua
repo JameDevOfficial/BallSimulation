@@ -3,7 +3,7 @@ local M = {}
 M.drawFrame = function(screen, balls, rects)
     love.graphics.setBackgroundColor(1, 1, 1)
     Suit.layout:reset(((screen.X - screen.minSize) / 2))
-    for _, ball in ipairs(balls) do
+    for i, ball in ipairs(balls) do
         love.graphics.setColor(ball.color[1], ball.color[2], ball.color[3], ball.color[4])
         love.graphics.circle("fill", ball.position.X, ball.position.Y, ball.radius)
     end
@@ -14,6 +14,7 @@ M.drawFrame = function(screen, balls, rects)
         rect.height)
     end
     Suit.Label(love.timer.getFPS(), { align = "right" }, Suit.layout:row(screen.minSize, 30))
+    
 
     local buttonCount = 0
     ButtonRows = 0
