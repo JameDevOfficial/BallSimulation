@@ -2,14 +2,24 @@ local M = {}
 
 M.createBall = function(screen, world, originalBall)
     local ball = originalBall
-    ball.position = {}
-    ball.position.X = screen.centerX
-    ball.position.Y = screen.centerY
+    local X, Y = love.mouse.getPosition()
+    ball.position = {X=X, Y=Y}
     ball.shape = love.physics.newCircleShape(originalBall.radius)
     ball.body = love.physics.newBody(world.world, ball.position.X, ball.position.Y, "dynamic")
     ball.fixture = love.physics.newFixture(ball.body, ball.shape, 1)
     ball.fixture:setRestitution(1)
     return ball
+end
+
+M.createRect = function(screen, world, originalRect)
+    local rect = originalRect
+    local x, y = love.mouse.getPosition()
+    rect.position = { X = x, Y = y }
+    rect.shape = love.physics.newRectangleShape(originalRect.width, originalRect.height)
+    rect.body = love.physics.newBody(world.world, rect.position.X, rect.position.Y, "static")
+    rect.fixture = love.physics.newFixture(rect.body, rect.shape, 1)
+    rect.fixture:setRestitution(1)
+    return rect
 end
 
 M.createBorder = function(screen, world)
