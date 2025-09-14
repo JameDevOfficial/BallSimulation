@@ -16,28 +16,44 @@ end
 
 
 M.drawSuit = function()
-    --Label
-    Suit.layout:reset(((Screen.X - Screen.minSize) / 2))
-    Suit.Label(love.timer.getFPS(), { align = "right" }, Suit.layout:row(Screen.minSize, 30))
-    Suit.Label(#Balls, { align = "right" }, Suit.layout:row(Screen.minSize, 30))
     --Buttons
     local button = { width = 100, height = 30, padding = 10 }
     local availableWidth = Screen.minSize - 300
     local buttonsPerRow = math.floor((availableWidth + button.padding) / (button.width + button.padding))
     if buttonsPerRow < 1 then buttonsPerRow = 1 end
-    Suit.layout:reset()
+    Suit.layout:reset(
+        ((Screen.X - Screen.minSize) / 2) +
+        ((Screen.minSize - (buttonsPerRow * button.width + (buttonsPerRow - 1) * button.padding)) / 2),
+        0, button.padding)
 
-    Suit.layout:row(0, button.height)
+    Suit.layout:row(0, button.height*0)
     local clearButton = Suit.Button("Clear", Colors.getButtonOpt(nil, { 128, 128, 128 }),
-        Suit.layout:row(button.width, button.height))
-    local splitButton = Suit.Button("Toggle Splitting", Colors.getButtonOpt(nil, { 128, 128, 128 }),
-        Suit.layout:row(button.width * 2, button.height))
-
+        Suit.layout:col(button.width, button.height))
+    local splitText = SplitBalls and "Disable Splitting" or "Enable Splitting"
+    local splitColor = SplitBalls and {0,255,0} or {255,0,0}
+    local splitButton = Suit.Button(splitText, Colors.getButtonOpt(nil, splitColor),
+        Suit.layout:col(button.width * 2, button.height))
+    local mergeText = MergeBalls and "Disable Merging" or "Enable Merging"
+    local mergeColor = MergeBalls and { 0, 255, 0 } or { 255, 0, 0 }
+    local mergeButton = Suit.Button(mergeText, Colors.getButtonOpt(nil, mergeColor),
+        Suit.layout:col(button.width * 2, button.height))
     --Handle clicks and Hover
     if splitButton.hit then
         SplitBalls = not SplitBalls
+        if SplitBalls and MergeBalls then
+            MergeBalls = not MergeBalls
+        end
     end
     if splitButton.hovered then
+        HoveringUIElement = true
+    end
+    if mergeButton.hit then
+        MergeBalls = not MergeBalls
+        if SplitBalls and MergeBalls then
+            SplitBalls = not SplitBalls
+        end
+    end
+    if mergeButton.hovered then
         HoveringUIElement = true
     end
     if clearButton.hit then
@@ -55,6 +71,11 @@ M.drawSuit = function()
     if clearButton.hovered then
         HoveringUIElement = true
     end
+
+    --Labels (DO NOT DRAW BEFORE BUTTONS!!!)
+    Suit.layout:reset(((Screen.X - Screen.minSize) / 2))
+    Suit.Label("FPS: "..love.timer.getFPS(), { align = "right" }, Suit.layout:row(Screen.minSize, 30))
+    Suit.Label("Balls: "..#Balls, { align = "right" }, Suit.layout:row(Screen.minSize, 30))
 end
 
 M.windowResized = function()

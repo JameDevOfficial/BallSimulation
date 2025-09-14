@@ -1,12 +1,12 @@
 UserInterface = require("game.ui")
-Core = require("game.core")
 Suit = require("game.suit")
-PhysicsCore = require("game.physicsCore")
+Core = require("game.core")
 DebugWorldDraw = require("game.libs.debugWorldDraw")
 Colors = require("game.libs.colors")
 Debug = require("game.libs.debug")
 PerformanceMonitor = require("game.libs.performance")
 SplitModule = require("game.splitting")
+MergeModule = require("game.merging")
 
 RENDER_DEBUG = false
 
@@ -26,9 +26,10 @@ Ball = {
     color = { 0.2, 1, 0.2, 1 },
     radius = 50,
     minRadius = 20,
+    maxRadius = 150,
     startVelocity = 100,
-    splitCooldown = 0,
-    canSplit = true,
+    interactCooldown = 0,
+    canInteract = true,
 }
 local rect = {
     position = { X = Screen.centerX, Y = Screen.centerY },
@@ -42,13 +43,13 @@ local border = {}
 function love.load(dt)
     --World initialization
     Screen = UserInterface.windowResized()
-    World.world:setCallbacks(PhysicsCore.beginContact, PhysicsCore.endContact, PhysicsCore.preContact,
-        PhysicsCore.postSolve)
-    border = PhysicsCore.createBorder(Screen, World)
+    World.world:setCallbacks(Core.beginContact, Core.endContact, Core.preContact,
+        Core.postSolve)
+    border = Core.createBorder(Screen, World)
 
     -- Other stuff
     Ball.position = { X = Screen.centerX, Y = Screen.centerY }
-    Ball = PhysicsCore.createBall(Screen, World, Ball)
+    Ball = Core.createBall(Screen, World, Ball)
     table.insert(Balls, Ball)
 end
 
@@ -56,9 +57,11 @@ function love.update(dt)
     --Pre checks and updates
     if IsPaused then return end
     ---
-    PhysicsCore.processPendingBallCreations()
-    SplitModule.handleSplittingCooldown(Balls, dt)
-    PhysicsCore.accelerateAllBalls(Balls, dt)
+    Core.processPendingBallSplits()
+    Core.processPendingBallRemovals()
+    Core.processPendingBallMerges()
+    Core.handleInteractCooldown(Balls, dt)
+    Core.accelerateAllBalls(Balls, dt)
     World.world.update(World.world, dt)
     HoveringUIElement = false
     UserInterface.drawSuit()
@@ -69,14 +72,14 @@ function love.draw()
     Suit.draw()
     if RENDER_DEBUG then
         DebugWorldDraw(World.world, ((Screen.X - Screen.minSize) / 2), ((Screen.Y - Screen.minSize) / 2), Screen.minSize,
-        Screen.minSize)
+            Screen.minSize)
     end
 end
 
 function love.resize()
     Screen = UserInterface.windowResized()
     border.fixture:destroy()
-    border = PhysicsCore.createBorder(Screen, World)
+    border = Core.createBorder(Screen, World)
 end
 
 function love.mousepressed(x, y, button)
@@ -91,10 +94,10 @@ function love.mousepressed(x, y, button)
             startVelocity = 100,
             angle = math.random(0, 360)
         }
-        newBall = PhysicsCore.createBall(Screen, World, newBall)
+        newBall = Core.createBall(Screen, World, newBall)
         table.insert(Balls, newBall)
         print("made new ball (" .. #Balls .. ")")
-    --Create Rect on mouseclick
+        --Create Rect on mouseclick
     elseif button == 2 then
         local newRect = {
             position = {},
@@ -103,7 +106,7 @@ function love.mousepressed(x, y, button)
             height = math.random(10, 100),
             startVelocity = 0,
         }
-        newRect = PhysicsCore.createRect(Screen, World, newRect)
+        newRect = Core.createRect(Screen, World, newRect)
         newRect.body:setLinearVelocity(rect.startVelocity, rect.startVelocity * math.pi)
         table.insert(Rects, newRect)
         print("made new rect (" .. #Rects .. ")")
