@@ -32,11 +32,11 @@ M.drawSuit = function()
     local splitText = SplitBalls and "Disable Splitting" or "Enable Splitting"
     local splitColor = SplitBalls and {0,255,0} or {255,0,0}
     local splitButton = Suit.Button(splitText, Colors.getButtonOpt(nil, splitColor),
-        Suit.layout:col(button.width * 2, button.height))
+        Suit.layout:col(button.width * 1.5, button.height))
     local mergeText = MergeBalls and "Disable Merging" or "Enable Merging"
     local mergeColor = MergeBalls and { 0, 255, 0 } or { 255, 0, 0 }
     local mergeButton = Suit.Button(mergeText, Colors.getButtonOpt(nil, mergeColor),
-        Suit.layout:col(button.width * 2, button.height))
+        Suit.layout:col(button.width * 1.5, button.height))
     --Handle clicks and Hover
     if splitButton.hit then
         SplitBalls = not SplitBalls
