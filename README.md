@@ -2,6 +2,8 @@
 
 A simple and interactive ball simulation built using [Lua](https://www.lua.org/), [LÖVE2D](https://love2d.org/), and [SUIT](https://github.com/vrld/SUIT) (Simple UI Toolkit for LÖVE). This project demonstrates basic physics, collision, and UI interaction in a LÖVE2D environment.
 
+![image](3Hr.png)
+
 ## Features
 
 - **Multiple Bouncing Balls:** Watch balls bounce and interact with each other and the environment.
