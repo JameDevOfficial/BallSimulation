@@ -16,7 +16,7 @@ M.getTempBall = function(originalBall, screen, pos)
         color = { originalBall.color[1], originalBall.color[2], originalBall.color[3] or { 1, 1, 1, 1 } },
         radius = originalBall.radius or 20,
         startVelocity = originalBall.startVelocity or 100,
-        interactCooldown = 5,
+        interactCooldown = 2,
         canInteract = false,
         collisionPoint = pos
     }
@@ -32,9 +32,13 @@ M.processPendingBallSplits = function()
 end
 
 M.processPendingBallMerges = function()
+    if #PendingBallRemovals ~= 0 then
+        print("Not merging because not all balls are removed\n-----------------------")
+        return
+    end
     if #PendingBallMerges > 0 then
         local merge = table.remove(PendingBallMerges, 1)
-        print("[MERGE] Processing merge for balls:", merge.balls[1], merge.balls[2])
+        --print("[MERGE] Processing merge for balls:", merge.balls[1], merge.balls[2])
         MergeModule.mergeBall(merge.balls, merge.collisionPoint)
         for i = #PendingBallMerges, 1, -1 do
             local balls = PendingBallMerges[i].balls
@@ -45,11 +49,12 @@ M.processPendingBallMerges = function()
         end
     end
     PendingBallMerges = {}
+    MergeModule.pendingMergeKeys = {}
 end
 
 M.processPendingBallRemovals = function()
     for _, ball in ipairs(PendingBallRemovals) do
-        print("Removing ", ball, ball.fixture)
+        --print("Removing ", ball, ball.fixture)
         if ball.fixture then
             ball.fixture:destroy()
             ball.fixture = nil

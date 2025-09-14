@@ -26,7 +26,7 @@ Ball = {
     color = { 0.2, 1, 0.2, 1 },
     radius = 50,
     minRadius = 20,
-    maxRadius = 150,
+    maxRadius = 80,
     startVelocity = 100,
     interactCooldown = 0,
     canInteract = true,
@@ -41,7 +41,9 @@ local rect = {
 local border = {}
 
 function love.load(dt)
+    love.window.maximize()
     --World initialization
+    math.randomseed(os.time())
     Screen = UserInterface.windowResized()
     World.world:setCallbacks(Core.beginContact, Core.endContact, Core.preContact,
         Core.postSolve)
