@@ -6,10 +6,14 @@ DebugWorldDraw = require("game.libs.debugWorldDraw")
 Colors = require("game.libs.colors")
 Debug = require("game.libs.debug")
 PerformanceMonitor = require("game.libs.performance")
+SplitModule = require("game.splitting")
+
+RENDER_DEBUG = false
 
 IsPaused = false
 HoveringUIElement = false
-SplitBalls = false -- TODO
+SplitBalls = false
+MergeBalls = false
 
 Screen = {}
 World = {
@@ -17,10 +21,11 @@ World = {
 }
 Balls = {}
 Rects = {}
-local ball = {
-    position = { X = Screen.centerX, Y = Screen.centerY },
+Ball = {
+    position = {},
     color = { 0.2, 1, 0.2, 1 },
     radius = 50,
+    minRadius = 20,
     startVelocity = 100,
     splitCooldown = 0,
     canSplit = true,
@@ -35,21 +40,24 @@ local rect = {
 local border = {}
 
 function love.load(dt)
+    --World initialization
     Screen = UserInterface.windowResized()
     World.world:setCallbacks(PhysicsCore.beginContact, PhysicsCore.endContact, PhysicsCore.preContact,
         PhysicsCore.postSolve)
-    print(Screen.topLeft.X, Screen.topLeft.Y, Screen.topRight.X, Screen.topRight.Y, Screen.bottomRight.X,
-        Screen.bottomRight.Y, Screen.bottomLeft.X, Screen.bottomLeft.Y)
-    ball = PhysicsCore.createBall(Screen, World, ball)
     border = PhysicsCore.createBorder(Screen, World)
-    table.insert(Balls, ball)
+
+    -- Other stuff
+    Ball.position = { X = Screen.centerX, Y = Screen.centerY }
+    Ball = PhysicsCore.createBall(Screen, World, Ball)
+    table.insert(Balls, Ball)
 end
 
 function love.update(dt)
+    --Pre checks and updates
     if IsPaused then return end
-    PerformanceMonitor.addEntry(dt)
+    ---
     PhysicsCore.processPendingBallCreations()
-    PhysicsCore.handleSplittingCooldown(Balls, dt)
+    SplitModule.handleSplittingCooldown(Balls, dt)
     PhysicsCore.accelerateAllBalls(Balls, dt)
     World.world.update(World.world, dt)
     HoveringUIElement = false
@@ -59,7 +67,10 @@ end
 function love.draw()
     UserInterface.drawFrame(Screen, Balls, Rects)
     Suit.draw()
-    --DebugWorldDraw(World.world, ((Screen.X - Screen.minSize) / 2), ((Screen.Y - Screen.minSize) / 2), Screen.minSize,Screen.minSize)
+    if RENDER_DEBUG then
+        DebugWorldDraw(World.world, ((Screen.X - Screen.minSize) / 2), ((Screen.Y - Screen.minSize) / 2), Screen.minSize,
+        Screen.minSize)
+    end
 end
 
 function love.resize()
@@ -70,6 +81,7 @@ end
 
 function love.mousepressed(x, y, button)
     if HoveringUIElement then return end
+    --Create Ball on mouseclick 1
     if button == 1 then
         local x, y = love.mouse.getPosition()
         local newBall = {
@@ -80,13 +92,9 @@ function love.mousepressed(x, y, button)
             angle = math.random(0, 360)
         }
         newBall = PhysicsCore.createBall(Screen, World, newBall)
-        -- Set velocity based on angle (in degrees)
-        local angleRad = math.rad(newBall.angle or 0)
-        local vx = newBall.startVelocity * math.cos(angleRad)
-        local vy = newBall.startVelocity * math.sin(angleRad)
-        newBall.body:setLinearVelocity(vx, vy)
         table.insert(Balls, newBall)
         print("made new ball (" .. #Balls .. ")")
+    --Create Rect on mouseclick
     elseif button == 2 then
         local newRect = {
             position = {},
@@ -105,10 +113,4 @@ end
 --Keypressed
 function love.keypressed(k)
     Debug.keypressed(k, Balls, Rects)
-    Suit.keypressed(k)
-end
-
--- forward keyboard events
-function love.textinput(t)
-    Suit.textinput(t)
 end

@@ -15,6 +15,8 @@ function M.keypressed(k, gridFactor, grid)
     if k == 'f8' then
         if amountPressedDebugInfo >= 5 then
             DEBUG = not DEBUG
+            print("DEBUG: "..tostring(DEBUG))
+            print("F6 - Pause Game")
             amountPressedDebugInfo = 0
             lastPressedDebugInfo = nil
         elseif lastPressedDebugInfo == nil then
@@ -31,17 +33,9 @@ function M.keypressed(k, gridFactor, grid)
     end
 
     if not DEBUG then return end
-    if k == 'f5' then
-        --
-    elseif k == 'f6' then
+    if k == 'f6' then
         pauseGame()
         print("Game paused:", IsPaused)
-    elseif k == 'f7' then
-        local avg = PerformanceMonitor.getAvg()
-        PerformanceMonitor.saveToFile()
-        PerformanceMonitor.clearEntries()
-        print("Avg: "..avg)
-        print("Performance entries saved and cleared.")
     end
 end
 
