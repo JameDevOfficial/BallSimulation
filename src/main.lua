@@ -118,4 +118,5 @@ end
 --Keypressed
 function love.keypressed(k)
     Debug.keypressed(k, Balls, Rects)
+    print(k )
 end
