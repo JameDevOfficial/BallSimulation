@@ -1,5 +1,8 @@
 local M = {}
 
+local fontDefault = love.graphics.newFont(20)
+fontDefault:setFilter("nearest", "nearest")
+
 M.drawFrame = function(screen, balls, rects)
     love.graphics.setBackgroundColor(1, 1, 1)
     for i, ball in ipairs(balls) do
@@ -26,11 +29,11 @@ M.drawSuit = function()
         ((Screen.minSize - (buttonsPerRow * button.width + (buttonsPerRow - 1) * button.padding)) / 2),
         0, button.padding)
 
-    Suit.layout:row(0, button.height*0)
+    Suit.layout:row(0, button.height * 0)
     local clearButton = Suit.Button("Clear", Colors.getButtonOpt(nil, { 128, 128, 128 }),
         Suit.layout:col(button.width, button.height))
     local splitText = SplitBalls and "Disable Splitting" or "Enable Splitting"
-    local splitColor = SplitBalls and {0,255,0} or {255,0,0}
+    local splitColor = SplitBalls and { 0, 255, 0 } or { 255, 0, 0 }
     local splitButton = Suit.Button(splitText, Colors.getButtonOpt(nil, splitColor),
         Suit.layout:col(button.width * 1.5, button.height))
     local mergeText = MergeBalls and "Disable Merging" or "Enable Merging"
@@ -74,8 +77,77 @@ M.drawSuit = function()
 
     --Labels (DO NOT DRAW BEFORE BUTTONS!!!)
     Suit.layout:reset(((Screen.X - Screen.minSize) / 2))
-    Suit.Label("FPS: "..love.timer.getFPS(), { align = "right" }, Suit.layout:row(Screen.minSize, 30))
-    Suit.Label("Balls: "..#Balls, { align = "right" }, Suit.layout:row(Screen.minSize, 30))
+    Suit.Label("FPS: " .. love.timer.getFPS(), { align = "right" }, Suit.layout:row(Screen.minSize, 30))
+    Suit.Label("Balls: " .. #Balls, { align = "right" }, Suit.layout:row(Screen.minSize, 30))
+end
+
+M.drawDebug = function()
+    if DEBUG == true then
+        love.graphics.setFont(fontDefault)
+        local y = fontDefault:getHeight() + 10
+
+        love.graphics.setColor(0, 0, 0)
+        love.graphics.print("Disable (F5) Debug Mode for more FPS")
+        y = y + fontDefault:getHeight()
+
+        love.graphics.setColor(0, 0.5, 0, 1)
+        -- FPS
+        local fps = love.timer.getFPS()
+        local fpsText = string.format("FPS: %d", fps)
+        love.graphics.print(fpsText, 10, y)
+        y = y + fontDefault:getHeight()
+
+        -- Performance
+        local stats = love.graphics.getStats()
+        local usedMem = collectgarbage("count")
+        local perfText = string.format(
+            "Memory: %.2f MB\n" ..
+            "GC Pause: %d%%\n" ..
+            "Draw Calls: %d\n" ..
+            "Canvas Switches: %d\n" ..
+            "Texture Memory: %.2f MB\n" ..
+            "Images: %d\n" ..
+            "Fonts: %d\n",
+            usedMem / 1024,
+            collectgarbage("count") > 0 and collectgarbage("count") / 7 or 0,
+            stats.drawcalls,
+            stats.canvasswitches,
+            stats.texturememory / 1024 / 1024,
+            stats.images,
+            stats.fonts
+        )
+        love.graphics.print(perfText, 10, y)
+        y = y + fontDefault:getHeight() * 8
+
+        -- Game
+        local dt = love.timer.getDelta()
+        local avgDt = love.timer.getAverageDelta()
+        local path = Core.path and #Core.path or 0
+
+        local playerText = string.format(
+            "Game state: %s\n" ..
+            "Delta Time: %.4fs (%.1f ms)\n" ..
+            "Avg Delta: %.4fs (%.1f ms)\n" ..
+            "Time: %.2fs\n" ..
+            "Balls: %02d\n",
+            tostring(Core.status),
+            dt, dt * 1000,
+            avgDt, avgDt * 1000,
+            love.timer.getTime(),
+            #Balls
+        )
+        love.graphics.print(playerText, 10, y)
+        y = y + fontDefault:getHeight() * 7
+
+        -- System Info
+        local renderer = love.graphics.getRendererInfo and love.graphics.getRendererInfo() or ""
+        local systemText = string.format(
+            "OS: %s\nGPU: %s",
+            love.system.getOS(),
+            select(4, love.graphics.getRendererInfo()) or 0
+        )
+        love.graphics.print(systemText, 10, y)
+    end
 end
 
 M.windowResized = function()

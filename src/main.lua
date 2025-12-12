@@ -72,6 +72,10 @@ end
 function love.draw()
     UserInterface.drawFrame(Screen, Balls, Rects)
     Suit.draw()
+
+    if DEBUG then
+        UserInterface.drawDebug()
+    end
     if RENDER_DEBUG then
         DebugWorldDraw(World.world, ((Screen.X - Screen.minSize) / 2), ((Screen.Y - Screen.minSize) / 2), Screen.minSize,
             Screen.minSize)
@@ -118,5 +122,5 @@ end
 --Keypressed
 function love.keypressed(k)
     Debug.keypressed(k, Balls, Rects)
-    print(k )
+    print(k)
 end
