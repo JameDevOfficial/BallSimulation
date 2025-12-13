@@ -24,16 +24,16 @@ M.getTempBall = function(originalBall, screen, pos)
 end
 
 M.processPendingBallSplits = function()
-    for _, split in ipairs(PendingBallSplits) do
+    if #PendingBallSplits > 0 then
+        local split = table.remove(PendingBallSplits, 1)
         SplitModule.splitBall(split.balls, split.amount, split.collisionPoint)
-        break
+        split = nil
     end
-    PendingBallSplits = {}
 end
 
 M.processPendingBallMerges = function()
     if #PendingBallRemovals ~= 0 then
-        print("Not merging because not all balls are removed\n-----------------------")
+        warn("Not merging because not all balls are removed\n-----------------------")
         return
     end
     if #PendingBallMerges > 0 then
@@ -61,7 +61,9 @@ M.processPendingBallRemovals = function()
         end
         for i = #Balls, 1, -1 do
             if Balls[i] == ball then
-                table.remove(Balls, i)
+                if Balls then
+                    table.remove(Balls, i)
+                end
                 break
             end
         end

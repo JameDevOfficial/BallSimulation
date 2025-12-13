@@ -4,7 +4,6 @@ Core = require("game.core")
 DebugWorldDraw = require("game.libs.debugWorldDraw")
 Colors = require("game.libs.colors")
 Debug = require("game.libs.debug")
-PerformanceMonitor = require("game.libs.performance")
 SplitModule = require("game.splitting")
 MergeModule = require("game.merging")
 
@@ -64,7 +63,7 @@ function love.update(dt)
     Core.processPendingBallMerges()
     Core.handleInteractCooldown(Balls, dt)
     Core.accelerateAllBalls(Balls, dt)
-    World.world.update(World.world, dt)
+    World.world:update(dt)
     HoveringUIElement = false
     UserInterface.drawSuit()
 end
@@ -122,5 +121,4 @@ end
 --Keypressed
 function love.keypressed(k)
     Debug.keypressed(k, Balls, Rects)
-    print(k)
 end

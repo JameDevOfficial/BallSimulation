@@ -87,7 +87,7 @@ M.drawDebug = function()
         local y = fontDefault:getHeight() + 10
 
         love.graphics.setColor(0, 0, 0)
-        love.graphics.print("Disable (F5) Debug Mode for more FPS")
+        love.graphics.print("Disable Debug Mode for more FPS")
         y = y + fontDefault:getHeight()
 
         love.graphics.setColor(0, 0.5, 0, 1)
